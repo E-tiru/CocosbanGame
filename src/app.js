@@ -11,11 +11,27 @@ var level = [
 var playerPosition; //マップ内のプレイやの位置(ｘ、ｙ)を保持する
 var playerSprite; //プレイヤーのスプライト
 var cratesArray = []; //配置した木箱のスプライトを配列に保持する
-
 var crateFallCount = 0; //木箱が穴に落ちた場合のカウント数を保持
 var startTouch;
 var endTouch;
 var swipeTolerance = 10;//スワイプかを判断する閾値
+
+public void keyTyped(KeyEvent e){
+  char key = e.getKeyChar();
+  if (key == 'r'){
+    level = [
+      [1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 0, 0, 0, 0, 1],
+      [1, 1, 3, 0, 2, 0, 1],
+      [1, 0, 0, 4, 0, 0, 1],
+      [1, 0, 3, 1, 2, 0, 1],
+      [1, 0, 0, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1]
+    ];
+    crateFallCount = 0;
+  }
+}
+
 
 var gameScene = cc.Scene.extend({
   onEnter: function() {
@@ -131,7 +147,6 @@ function swipeDirection(){
         }
     }
 }
-
 function move(deltaX,deltaY){
 switch(level[playerPosition.y+deltaY][playerPosition.x+deltaX]){
     case 0:
