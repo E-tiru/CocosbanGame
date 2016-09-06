@@ -152,17 +152,19 @@ switch(level[playerPosition.y+deltaY][playerPosition.x+deltaX]){
             level[playerPosition.y][playerPosition.x]+=1; //木箱の位置にプレイヤー
             playerSprite.setPosition(165+25*playerPosition.x,185-25*playerPosition.y);
             level[playerPosition.y+deltaY][playerPosition.x+deltaX]+=3;//木箱(3)の移動先
-            if( level[playerPosition.y+deltaY][playerPosition.x+deltaX]==5 ){
-              crateFallCount += 1;
-            }
-            if (crateFallCount == 3){
-              cc.director.runScene(new gameover());
-            }
+
             var movingCrate = cratesArray[playerPosition.y][playerPosition.x];
             movingCrate.setPosition(movingCrate.getPosition().x+25*deltaX,movingCrate.
             getPosition().y-25*deltaY);
             cratesArray[playerPosition.y+deltaY][playerPosition.x+deltaX]=movingCrate;
             cratesArray[playerPosition.y][playerPosition.x]=null;
+        }
+        if( level[playerPosition.y+deltaY][playerPosition.x+deltaX]==5 ){
+          crateFallCount += 1;
+        }
+        if (crateFallCount == 3){
+          cc.director.runScene(new gameover());
+          crateFallCount = 0;
         }
         break;
     }
