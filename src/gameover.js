@@ -6,7 +6,7 @@ var gameoverLayer = cc.Layer.extend({
         var label = cc.LabelTTF.create("Game Ｃｌｅａｒ!!", "Arial", 50);
         label.setPosition(size.width / 2, size.height * 3 / 6);
         this.addChild(label, 1);
-        gameoverText = cc.LabelTTF.create("タッチしてリトライ", "Arial", 32);
+        gameoverText = cc.LabelTTF.create("タッチして次のステージへ", "Arial", 32);
         this.addChild(gameoverText);
         gameoverText.setPosition(size.width / 2, size.height * 2 / 6);
         // タップイベントリスナーを登録する
@@ -25,15 +25,17 @@ var gameoverLayer = cc.Layer.extend({
     onTouchMoved: function(touch, event) {},
     onTouchEnded: function(touch, event) {
         cc.director.runScene(new gameScene());
-        level = [
-          [1, 1, 1, 1, 1, 1, 1],
-          [1, 1, 0, 0, 0, 0, 1],
-          [1, 1, 3, 0, 2, 0, 1],
-          [1, 0, 0, 4, 0, 0, 1],
-          [1, 0, 3, 1, 2, 0, 1],
-          [1, 0, 0, 1, 1, 1, 1],
-          [1, 1, 1, 1, 1, 1, 1]
-        ];
+        if(stage  == 2){
+          level = [
+            [1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 0, 0, 0, 0, 1],
+            [1, 1, 0, 3, 2, 0, 1],
+            [1, 0, 0, 4, 0, 0, 1],
+            [1, 0, 3, 1, 2, 0, 1],
+            [1, 0, 0, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1]
+          ];
+        }
     },
 });
 

@@ -8,6 +8,19 @@ var level = [
   [1, 0, 0, 1, 1, 1, 1],
   [1, 1, 1, 1, 1, 1, 1]
 ];
+var init_map = [            // 初期化用のマップ配列
+  [1, 1, 1, 1, 1, 1, 1],
+  [1, 1, 0, 0, 0, 0, 1],
+  [1, 1, 3, 0, 2, 0, 1],
+  [1, 0, 0, 4, 0, 0, 1],
+  [1, 0, 3, 1, 2, 0, 1],
+  [1, 0, 0, 1, 1, 1, 1],
+  [1, 1, 1, 1, 1, 1, 1]
+];
+var stage = 1;
+var ClearCount = 2;
+
+var init_crates = [];
 var playerPosition; //マップ内のプレイやの位置(ｘ、ｙ)を保持する
 var playerSprite; //プレイヤーのスプライト
 var cratesArray = []; //配置した木箱のスプライトを配列に保持する
@@ -15,23 +28,6 @@ var crateFallCount = 0; //木箱が穴に落ちた場合のカウント数を保
 var startTouch;
 var endTouch;
 var swipeTolerance = 10;//スワイプかを判断する閾値
-
-public void keyTyped(KeyEvent e){
-  char key = e.getKeyChar();
-  if (key == 'r'){
-    level = [
-      [1, 1, 1, 1, 1, 1, 1],
-      [1, 1, 0, 0, 0, 0, 1],
-      [1, 1, 3, 0, 2, 0, 1],
-      [1, 0, 0, 4, 0, 0, 1],
-      [1, 0, 3, 1, 2, 0, 1],
-      [1, 0, 0, 1, 1, 1, 1],
-      [1, 1, 1, 1, 1, 1, 1]
-    ];
-    crateFallCount = 0;
-  }
-}
-
 
 var gameScene = cc.Scene.extend({
   onEnter: function() {
@@ -41,6 +37,13 @@ var gameScene = cc.Scene.extend({
     layer0.init();
     this.addChild(layer0);
 
+    //音楽再生エンジン
+    audioEngine = cc.audioEngine;
+    //bgm再生
+    if (!audioEngine.isMusicPlaying()) {
+      //audioEngine.playMusic("res/bgm_main.mp3", true);
+      audioEngine.playMusic(res.bgm_main, true);
+    }
   }
 });
 
@@ -67,6 +70,7 @@ var gameLayer = cc.Layer.extend({
 
     for (i = 0; i < 7; i++) {　　　　　　
       cratesArray[i] = [];　 //配列オブジェクトの生成
+      init_crates[i] = [];
       for (j = 0; j < 7; j++) {
         switch (level[i][j]) {
           case 4:
@@ -80,6 +84,8 @@ var gameLayer = cc.Layer.extend({
               y: i
             };　　　　　　　　　　　　
             cratesArray[i][j] = null;　 //playerがいるので、その場所には木箱はないのでnullを代入する
+            var copy = cratesArray[i][j];
+            init_crates[i][j] = copy;
             break;
           case 3:
           case 5:
@@ -88,18 +94,28 @@ var gameLayer = cc.Layer.extend({
             crateSprite.setScale(5);
             this.addChild(crateSprite);
             cratesArray[i][j] = crateSprite;//(i,j)の位置にcrateSpriteを入れる
+            var copy = cratesArray[i][j];
+            init_crates[i][j] = copy;
             break;
           default:
             cratesArray[i][j] = null;//木箱のコード以外の場合は、その場所に木箱がない値としてnullを代入する
+            var copy = cratesArray[i][j];
+            init_crates[i][j] = copy;
             break;
         }
       }
     }
     //return true;
     cc.eventManager.addListener(listener, this);
+    cc.eventManager.addListener({
+      event: cc.EventListener.KEYBOARD,
+      onKeyPressed: function(keyCode, event){
+        if(keyCode == 82) reset();          // R-Keyでリセット
+        if(keyCode == 66) back();           // B-Keyでバック
+      }
+    }, this);
   },
 });
-
 var listener = cc.EventListener.create({
 event: cc.EventListener.TOUCH_ONE_BY_ONE,
 swallowTouches: true,
@@ -174,13 +190,59 @@ switch(level[playerPosition.y+deltaY][playerPosition.x+deltaX]){
             cratesArray[playerPosition.y+deltaY][playerPosition.x+deltaX]=movingCrate;
             cratesArray[playerPosition.y][playerPosition.x]=null;
         }
-        if( level[playerPosition.y+deltaY][playerPosition.x+deltaX]==5 ){
-          crateFallCount += 1;
-        }
-        if (crateFallCount == 3){
-          cc.director.runScene(new gameover());
-          crateFallCount = 0;
-        }
         break;
     }
+    complete_check()      //クリアの確認
+}
+// リセット処理
+function reset(){
+  crateFallCount = 0;
+  for (var i = 0; i < 7; i++){
+    for (var j = 0; j < 7; j++){
+      var copy = init_map[i][j];
+      level[i][j] = copy;
+      switch (level[i][j]) {
+        case 4:
+        case 6:
+          playerSprite.setPosition(165 + 25 * j, 185 - 25 * i);
+          playerPosition = {
+            x: j,
+            y: i
+          };
+          var copy = init_crates[i][j];
+          cratesArray[i][j] = copy;
+          break;
+        case 3:
+        case 5:
+          var copy = init_crates[i][j];
+          cratesArray[i][j] = copy;
+          var crateSprite = cratesArray[i][j];
+          crateSprite.setPosition(165 + 25 * j, 185 - 25 * i);
+          break;
+        default:
+          var copy = init_crates[i][j];
+          cratesArray[i][j] = copy;
+          break;
+      }
+    }
+  }
+}
+// クリアチェック処理
+function complete_check(){
+  var gameClearflg = 0; //箱を落とした数判定
+  for (var i = 0; i < 7; i++) {
+    for (var j = 0; j < 7; j++) {
+      if ( level[i][j] == 5 ) gameClearflg +=1;//箱を落としたので変数に加算
+    }
+  }
+  console.log(gameClearflg);
+  if (gameClearflg == ClearCount){
+      stage = stage + 1; //次のステージへ行くための変数
+      //ClearCount += 1;  //必要な穴を増やすときのコード
+    //audioEngine.playEffect(res.se_clear); //クリアＢＧＭ再生
+    if (audioEngine.isMusicPlaying()) {
+      audioEngine.stopMusic();//音楽の再生をストップ
+    }
+    cc.director.runScene(new gameover());//リザルトに移動
+  }
 }
