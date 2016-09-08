@@ -314,5 +314,8 @@ function complete_check(){
       audioEngine.stopMusic();//音楽の再生をストップ
     }
     cc.director.runScene(new gameover());//リザルトに移動
+    if(stage == 4){
+      stage = 1;
+    }
   }
 }
