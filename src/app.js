@@ -20,6 +20,9 @@ var init_map = [            // 初期化用のマップ配列
 var stage = 1;
 var ClearCount = 2;
 
+var back_map = [];          // 戻り処理用のマップ配列
+var back_crate = [];        // 初期化用の木箱スプライト配列
+var back_crates = [];       // 戻り処理用の木箱スプライト配列
 var init_crates = [];
 var playerPosition; //マップ内のプレイやの位置(ｘ、ｙ)を保持する
 var playerSprite; //プレイヤーのスプライト
@@ -185,7 +188,8 @@ function swipeDirection(){
     }
 }
 function move(deltaX,deltaY){
-switch(level[playerPosition.y+deltaY][playerPosition.x+deltaX]){
+  back_up();  //バックアップ
+  switch(level[playerPosition.y+deltaY][playerPosition.x+deltaX]){
     case 0:
     case 2:
         level[playerPosition.y][playerPosition.x]-=4;
@@ -243,6 +247,51 @@ function reset(){
         default:
           var copy = init_crates[i][j];
           cratesArray[i][j] = copy;
+          break;
+      }
+    }
+  }
+}
+//ひとつ前のバックアップ処理
+function back_up(){
+  for (var i = 0; i < 7; i++){
+    back_map[i] = [];
+    back_crates[i] = [];
+    for (var j = 0; j < 7; j++){
+      var copy1 = level[i][j];
+      back_map[i][j] = copy1;
+      var copy2 = cratesArray[i][j];
+      back_crates[i][j] = copy2;
+    }
+  }
+}
+//一つ前に戻る処理
+function back(){
+  for(var i = 0; i < 7; i++){
+    for(var j = 0; j < 7; j++){
+      var copy1 = back_map[i][j];
+      level[i][j] = copy1;
+      switch (level[i][j]) {
+        case 4:
+        case 6:
+          playerSprite.setPosition(165 + 25 * j, 185 - 25 * i);
+          playerPosition = {
+            x: j,
+            y: i
+          };
+          var copy2 = back_crates[i][j];
+          cratesArray[i][j] = copy2;
+          break;
+        case 3:
+        case 5:
+          var copy2 = back_crates[i][j];
+          cratesArray[i][j] = copy2;
+          var crateSprite = cratesArray[i][j];
+          crateSprite.setPosition(165 + 25 * j, 185 - 25 * i);
+          break;
+        default:
+          var copy2 = back_crates[i][j];
+          cratesArray[i][j] = copy2;
           break;
       }
     }
