@@ -63,11 +63,32 @@ var gameLayer = cc.Layer.extend({
     backgroundSprite.setScale(5);
     this.addChild(backgroundSprite);
 
-    var levelSprite = cc.Sprite.create(cache.getSpriteFrame("level.png"));
-    levelSprite.setPosition(240, 110);
-    levelSprite.setScale(5);
-    this.addChild(levelSprite);
-
+    for (i = 0; i < 7; i++) {
+      for (j = 0; j < 7; j++) {
+        switch (level[i][j]) {
+          case 0:
+          case 3:
+          case 4:
+          fieldSprite = cc.Sprite.create(cache.getSpriteFrame("field.png"));
+          fieldSprite.setPosition(165 + 25 * j, 185 - 25 * i);
+          fieldSprite.setScale(5);
+          this.addChild(fieldSprite);
+          break;
+          case 1:
+          wallSprite = cc.Sprite.create(cache.getSpriteFrame("wall.png"));
+          wallSprite.setPosition(165 + 25 * j, 185 - 25 * i);
+          wallSprite.setScale(5);
+          this.addChild(wallSprite);
+          break;
+          case 2:
+          holeSprite = cc.Sprite.create(cache.getSpriteFrame("hole.png"));
+          holeSprite.setPosition(165 + 25 * j, 185 - 25 * i);
+          holeSprite.setScale(5);
+          this.addChild(holeSprite);
+          break;
+        }
+      }
+    }
     for (i = 0; i < 7; i++) {　　　　　　
       cratesArray[i] = [];　 //配列オブジェクトの生成
       init_crates[i] = [];
